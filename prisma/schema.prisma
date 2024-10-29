@@ -1,0 +1,54 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../src/prisma/client"
+}
+
+model Movies {
+  id            String    @id @default(uuid())
+  title         String    @db.VarChar(100)
+  release_year  Int
+  genre         String    @db.VarChar(50)
+  user_id       String    
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @default(now())
+  user          Users     @relation(fields: [user_id], references: [id])
+
+  reviews Reviews[]
+}
+
+model Users {
+  id          String  @id @default(uuid())
+  name        String  @unique @db.VarChar(100)
+  email       String  @unique @db.VarChar(100)
+  password    String  @db.VarChar(100)
+  role        UserRole
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+
+  movies  Movies[]
+  reviews Reviews[]
+}
+
+model Reviews {
+  id          String        @id @default(uuid())
+  movie_id    String        
+  user_id     String
+  review_text String        @db.VarChar(100)
+  rating      Int
+  review_date String        @db.VarChar(50)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @default(now())
+
+  movie       Movies        @relation(fields: [movie_id], references: [id])
+  user        Users         @relation(fields: [user_id], references: [id])
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
